@@ -1,1 +1,676 @@
 
+DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StatsForYou — Baseball Stat Tracker for Athletes & Coaches</title>
+<meta name="description" content="Track every at-bat. Understand every stat. Built for youth baseball athletes, parents, and coaches. Free to start. Platinum from $5.99/mo."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --orange:#f97316;
+  --orange-dim:#c2570e;
+  --black:#080808;
+  --surface:#111111;
+  --surface2:#181818;
+  --border:#242424;
+  --text:#f0f0f0;
+  --muted:#888;
+  --green:#22c55e;
+  --gold:#f0b800;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;overflow-x:hidden;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--orange);letter-spacing:.5px;}
+.nav-logo span{color:var(--text);}
+.nav-cta{background:var(--orange);color:#000;font-weight:700;font-size:14px;padding:9px 20px;border-radius:8px;text-decoration:none;transition:background .15s;}
+.nav-cta:hover{background:#ea6a07;}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(249,115,22,.12) 0%,transparent 70%);pointer-events:none;}
+.hero-diamond{position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:500px;height:500px;border:1px solid rgba(249,115,22,.06);border-radius:50%;pointer-events:none;}
+.hero-diamond2{position:absolute;bottom:-120px;left:50%;transform:translateX(-50%);width:700px;height:700px;border:1px solid rgba(249,115,22,.04);border-radius:50%;pointer-events:none;}
+
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.25);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;}
+.hero h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(52px,12vw,96px);font-weight:900;line-height:.95;letter-spacing:-1px;margin-bottom:20px;max-width:800px;}
+.hero h1 em{font-style:italic;color:var(--orange);}
+.hero-sub{font-size:clamp(16px,2.5vw,20px);color:var(--muted);max-width:540px;margin:0 auto 36px;line-height:1.65;}
+
+/* SCOREBOARD */
+.scoreboard{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:44px;width:100%;max-width:380px;}
+.sb-cell{flex:1;padding:20px 12px;text-align:center;border-right:1px solid var(--border);}
+.sb-cell:last-child{border-right:none;}
+.sb-num{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;color:var(--orange);line-height:1;letter-spacing:-1px;}
+.sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:4px;}
+
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.btn-primary{background:var(--orange);color:#000;font-weight:700;font-size:16px;padding:14px 32px;border-radius:10px;text-decoration:none;transition:background .15s;border:none;cursor:pointer;}
+.btn-primary:hover{background:#ea6a07;}
+.btn-secondary{background:transparent;color:var(--text);font-weight:600;font-size:16px;padding:14px 28px;border-radius:10px;text-decoration:none;border:1px solid var(--border);transition:border-color .15s;}
+.btn-secondary:hover{border-color:var(--orange);color:var(--orange);}
+.hero-note{font-size:12px;color:var(--muted);margin-top:14px;}
+
+/* ── PHONE MOCKUP ── */
+.phone-section{padding:80px 24px;display:flex;flex-direction:column;align-items:center;background:linear-gradient(180deg,var(--black) 0%,var(--surface) 50%,var(--black) 100%);}
+.phone-wrap{position:relative;width:260px;height:520px;}
+.phone-shell{position:absolute;inset:0;background:#1a1a1a;border-radius:40px;border:2px solid #333;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7),0 0 0 1px #000;}
+.phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:80px;height:26px;background:#1a1a1a;border-radius:0 0 16px 16px;z-index:10;}
+.phone-screen{position:absolute;inset:0;background:#0d0d0d;border-radius:39px;padding:36px 12px 16px;overflow:hidden;}
+.ph-topbar{background:#111;border-radius:10px;padding:8px 10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.ph-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;color:#fff;}
+.ph-badge{background:#c9980020;border:1px solid #c99800;border-radius:10px;padding:1px 6px;font-size:8px;font-weight:700;color:#c99800;}
+.ph-label{font-size:7px;font-weight:700;color:#555;letter-spacing:.08em;text-transform:uppercase;margin:8px 0 5px;}
+.ph-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px;}
+.ph-grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:10px;}
+.ph-stat{background:#161616;border:1px solid #222;border-radius:6px;padding:5px 2px;text-align:center;}
+.ph-sv{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#f97316;line-height:1;}
+.ph-sl{color:#cbd5e1;}
+.ph-sk{font-size:6px;color:#555;font-weight:700;letter-spacing:.04em;}
+.ph-game{background:#161616;border:1px solid #222;border-radius:7px;padding:7px 8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.ph-gname{font-size:9px;font-weight:700;color:#fff;}
+.ph-gdate{font-size:7px;color:#555;}
+.ph-gval{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;color:#f97316;}
+.phone-glow{position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(249,115,22,.2),transparent 70%);border-radius:50%;pointer-events:none;}
+
+/* ── SECTIONS ── */
+section{padding:80px 24px;}
+.section-inner{max-width:1000px;margin:0 auto;}
+.section-eyebrow{font-size:11px;font-weight:700;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,6vw,56px);font-weight:900;line-height:1.05;margin-bottom:16px;}
+.section-sub{font-size:17px;color:var(--muted);max-width:520px;line-height:1.7;}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:48px;}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;transition:border-color .2s;}
+.feat-card:hover{border-color:rgba(249,115,22,.4);}
+.feat-icon{font-size:32px;margin-bottom:14px;}
+.feat-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;color:#fff;}
+.feat-desc{font-size:14px;color:var(--muted);line-height:1.65;}
+.feat-tag{display:inline-block;margin-top:12px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.06em;text-transform:uppercase;}
+.tag-free{background:#1a2a1a;color:var(--green);}
+.tag-plat{background:#1a1500;color:var(--gold);}
+
+/* ── STATS SHOWCASE ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border-radius:16px;overflow:hidden;margin-top:48px;}
+.stat-cell{background:var(--surface);padding:32px 20px;text-align:center;}
+.stat-big{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;color:var(--orange);line-height:1;}
+.stat-desc{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;}
+
+/* ── TESTIMONIALS ── */
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:40px;}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.testi-stars{color:var(--orange);font-size:16px;margin-bottom:12px;letter-spacing:2px;}
+.testi-text{font-size:15px;line-height:1.7;color:#ccc;margin-bottom:16px;}
+.testi-name{font-weight:700;font-size:14px;}
+.testi-role{font-size:12px;color:var(--muted);}
+.testi-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#000;flex-shrink:0;}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;margin-top:48px;position:relative;}
+.step{text-align:center;}
+.step-num{font-family:'Barlow Condensed',sans-serif;font-size:72px;font-weight:900;color:rgba(249,115,22,.15);line-height:1;margin-bottom:4px;}
+.step-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;}
+.step-desc{font-size:14px;color:var(--muted);line-height:1.65;}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:44px;max-width:680px;margin-left:auto;margin-right:auto;}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;}
+.price-card.featured{border-color:var(--gold);background:linear-gradient(135deg,#1a1200,#1f1800);}
+.price-name{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.price-name.gold{color:var(--gold);}
+.price-amt{font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:900;line-height:1;color:#fff;}
+.price-amt.gold{color:var(--gold);}
+.price-period{font-size:16px;color:var(--muted);font-weight:500;}
+.price-note{font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:24px;}
+.price-divider{height:1px;background:var(--border);margin:20px 0;}
+.price-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:14px;color:#ccc;}
+.price-check{color:var(--green);font-size:16px;flex-shrink:0;margin-top:1px;}
+.price-x{color:#444;font-size:16px;flex-shrink:0;}
+.price-cta{display:block;text-align:center;margin-top:24px;padding:13px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;transition:all .15s;}
+.price-cta.free{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.price-cta.free:hover{border-color:var(--orange);color:var(--orange);}
+.price-cta.gold-btn{background:linear-gradient(135deg,#b38600,#f0b800);color:#000;}
+.price-cta.gold-btn:hover{filter:brightness(1.1);}
+
+/* ── FAQ ── */
+.faq-list{margin-top:40px;max-width:680px;}
+.faq-item{border-bottom:1px solid var(--border);padding:20px 0;cursor:pointer;}
+.faq-q{font-size:16px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.faq-q .arrow{color:var(--orange);font-size:20px;transition:transform .2s;flex-shrink:0;}
+.faq-a{font-size:14px;color:var(--muted);line-height:1.75;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;}
+.faq-item.open .faq-a{max-height:200px;padding-top:12px;}
+.faq-item.open .arrow{transform:rotate(45deg);}
+
+/* ── CTA BANNER ── */
+.cta-banner{background:linear-gradient(135deg,#1a0c00 0%,#2a1500 50%,#1a0c00 100%);border-top:1px solid rgba(249,115,22,.2);border-bottom:1px solid rgba(249,115,22,.2);padding:80px 24px;text-align:center;}
+.cta-banner h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,7vw,72px);font-weight:900;line-height:1;margin-bottom:16px;}
+.cta-banner h2 span{color:var(--orange);}
+.cta-banner p{font-size:18px;color:var(--muted);margin-bottom:36px;}
+
+/* ── FOOTER ── */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:40px 24px;text-align:center;}
+.footer-logo{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--orange);margin-bottom:8px;}
+.footer-tagline{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.footer-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+.footer-links a{font-size:13px;color:var(--muted);text-decoration:none;}
+.footer-links a:hover{color:var(--orange);}
+.footer-copy{font-size:12px;color:#444;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  section{padding:56px 18px;}
+  .hero{padding:80px 18px 48px;}
+  .hero-btns{flex-direction:column;align-items:center;}
+  .btn-primary,.btn-secondary{width:100%;max-width:320px;text-align:center;}
+  .steps{gap:24px;}
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{opacity:0;animation:fadeUp .6s ease forwards;}
+.fade-up.d1{animation-delay:.1s;}
+.fade-up.d2{animation-delay:.22s;}
+.fade-up.d3{animation-delay:.34s;}
+.fade-up.d4{animation-delay:.46s;}
+
+.ticker{display:inline-block;min-width:1ch;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Stats<span>ForYou</span></div>
+  <div style="display:flex;gap:16px;align-items:center;">
+    <a href="#install" style="color:var(--muted);font-size:14px;font-weight:600;text-decoration:none;display:none;" id="nav-install">How to Install</a>
+    <a href="#install" style="color:#888;font-size:13px;font-weight:600;text-decoration:none;">How to Install</a>
+    <a href="#pricing" class="nav-cta">Get the App</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-diamond"></div>
+  <div class="hero-diamond2"></div>
+
+  <div class="eyebrow fade-up d1">⚾ Built for Baseball</div>
+  <h1 class="fade-up d2">Track Every<br/><em>At-Bat.</em><br/>Know Every Stat.</h1>
+  <p class="hero-sub fade-up d3">The stat tracker built for youth baseball athletes, coaches, and the dads in the dugout. Simple enough for a 12-year-old. Deep enough to impress a college scout.</p>
+
+  <!-- SCOREBOARD TICKER -->
+  <div class="scoreboard fade-up d4">
+    <div class="sb-cell">
+      <div class="sb-num"><span class="ticker" id="t-avg">—</span></div>
+      <div class="sb-label">Season AVG</div>
+    </div>
+    <div class="sb-cell">
+      <div class="sb-num"><span class="ticker" id="t-hr">0</span></div>
+      <div class="sb-label">Home Runs</div>
+    </div>
+    <div class="sb-cell">
+      <div class="sb-num"><span class="ticker" id="t-rbi">0</span></div>
+      <div class="sb-label">RBI</div>
+    </div>
+  </div>
+
+  <div class="hero-btns fade-up d4">
+    <a href="#pricing" class="btn-primary">Download Free →</a>
+    <a href="#features" class="btn-secondary">See What's Inside</a>
+  </div>
+  <p class="hero-note fade-up d4">Free to start. No app store needed. Works on any phone.</p>
+</section>
+
+<!-- PHONE MOCKUP + CONTEXT -->
+<div class="phone-section">
+  <div style="text-align:center;margin-bottom:48px;max-width:560px;">
+    <div class="section-eyebrow">Live Preview</div>
+    <div class="section-title" style="font-size:clamp(32px,5vw,48px);">Looks great.<br/>Works everywhere.</div>
+    <p class="section-sub" style="margin:12px auto 0;">No app store. No account required. Download one file, open it in Safari, and add it to your home screen in under 60 seconds.</p>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="ph-topbar">
+          <div>
+            <div class="ph-title">StatsForYou</div>
+            <div style="font-size:7px;color:#555;font-weight:600;letter-spacing:.05em;">JAKE MILLER · 2027</div>
+          </div>
+          <div class="ph-badge">PLATINUM</div>
+        </div>
+        <div class="ph-label">Season Batting</div>
+        <div class="ph-grid4">
+          <div class="ph-stat"><div class="ph-sv">.327</div><div class="ph-sk">AVG</div></div>
+          <div class="ph-stat"><div class="ph-sv">.401</div><div class="ph-sk">OBP</div></div>
+          <div class="ph-stat"><div class="ph-sv">.512</div><div class="ph-sk">SLG</div></div>
+          <div class="ph-stat"><div class="ph-sv">.913</div><div class="ph-sk">OPS</div></div>
+        </div>
+        <div class="ph-grid5">
+          <div class="ph-stat"><div class="ph-sv">142</div><div class="ph-sk">AB</div></div>
+          <div class="ph-stat"><div class="ph-sv">46</div><div class="ph-sk">H</div></div>
+          <div class="ph-stat"><div class="ph-sv">9</div><div class="ph-sk">HR</div></div>
+          <div class="ph-stat"><div class="ph-sv">38</div><div class="ph-sk">RBI</div></div>
+          <div class="ph-stat"><div class="ph-sv">22</div><div class="ph-sk">BB</div></div>
+        </div>
+        <div class="ph-label">Season Pitching</div>
+        <div class="ph-grid4" style="margin-bottom:10px;">
+          <div class="ph-stat"><div class="ph-sv ph-sl">34.1</div><div class="ph-sk">IP</div></div>
+          <div class="ph-stat"><div class="ph-sv ph-sl">2.36</div><div class="ph-sk">ERA</div></div>
+          <div class="ph-stat"><div class="ph-sv ph-sl">0.98</div><div class="ph-sk">WHIP</div></div>
+          <div class="ph-stat"><div class="ph-sv ph-sl">41</div><div class="ph-sk">K</div></div>
+        </div>
+        <div class="ph-label">Game Log</div>
+        <div class="ph-game"><div><div class="ph-gname">vs. Bulldogs</div><div class="ph-gdate">Jun 8 · W 7-2</div></div><div class="ph-gval">3-4</div></div>
+        <div class="ph-game"><div><div class="ph-gname">vs. Cardinals</div><div class="ph-gdate">Jun 5 · W 4-1</div></div><div class="ph-gval">2-3</div></div>
+        <div class="ph-game"><div><div class="ph-gname">vs. Eagles</div><div class="ph-gdate">Jun 1 · L 3-5</div></div><div class="ph-gval">1-4</div></div>
+      </div>
+    </div>
+    <div class="phone-glow"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:56px;max-width:680px;width:100%;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      <div style="font-size:24px;margin-bottom:8px;">📱</div>
+      <div style="font-weight:700;margin-bottom:4px;">Add to home screen</div>
+      <div style="font-size:13px;color:var(--muted);">Works like a real app on iPhone and Android.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      <div style="font-size:24px;margin-bottom:8px;">💾</div>
+      <div style="font-weight:700;margin-bottom:4px;">Stats saved locally</div>
+      <div style="font-size:13px;color:var(--muted);">Your data stays on your device — no account needed.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      <div style="font-size:24px;margin-bottom:8px;">⚡</div>
+      <div style="font-weight:700;margin-bottom:4px;">Instant setup</div>
+      <div style="font-size:13px;color:var(--muted);">Download and open. No install, no login, no waiting.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features" style="background:var(--surface);">
+  <div class="section-inner">
+    <div class="section-eyebrow">Features</div>
+    <div class="section-title">Everything a serious<br/>athlete needs.</div>
+    <p class="section-sub">Built from the dugout up — by someone who knows what it takes to chase a Division I offer.</p>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">⚾</div>
+        <div class="feat-title">Personal Stat Tracker</div>
+        <div class="feat-desc">Log every game — at-bats, hits, home runs, RBI, walks, stolen bases, ERA, WHIP, and more. Season totals auto-calculate as you go.</div>
+        <span class="feat-tag tag-free">Free</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📚</div>
+        <div class="feat-title">Learn the Stats</div>
+        <div class="feat-desc">Every stat explained in plain language — what it means, how it's calculated, what "good" looks like at different levels, and why scouts care about it.</div>
+        <span class="feat-tag tag-free">Free</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📋</div>
+        <div class="feat-title">Full Game History</div>
+        <div class="feat-desc">Every game saved with date, opponent, result, and box score. Edit or delete any entry. Go back to Opening Day and see exactly how you've grown.</div>
+        <span class="feat-tag tag-free">Free</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">👥</div>
+        <div class="feat-title">Team Tracker</div>
+        <div class="feat-desc">Add your full roster. Track each player's stats individually. View team leaderboards for AVG, HR, and RBI. Perfect for coaches and travel team parents.</div>
+        <span class="feat-tag tag-plat">Platinum</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💬</div>
+        <div class="feat-title">Team Chat</div>
+        <div class="feat-desc">Built-in messaging so your team stays connected between games. No third-party app needed — everything lives inside StatsForYou.</div>
+        <span class="feat-tag tag-plat">Platinum</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🖼️</div>
+        <div class="feat-title">Custom Banners & Photos</div>
+        <div class="feat-desc">Upload your profile photo — a selfie or action shot. Set your team banner as the background on your stats and chat screens. Make it yours.</div>
+        <span class="feat-tag tag-plat">Platinum</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS SECTION -->
+<section style="background:var(--black);">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-eyebrow">By the Numbers</div>
+    <div class="section-title">Built for the grind.</div>
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-big">17</div>
+        <div class="stat-desc">Stats tracked and explained<br/>in full detail</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-big">$0</div>
+        <div class="stat-desc">To start tracking<br/>your season today</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-big">60s</div>
+        <div class="stat-desc">To install on<br/>your home screen</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-big">D1</div>
+        <div class="stat-desc">The stats scouts actually<br/>look at — all tracked</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="background:var(--surface);">
+  <div class="section-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <div class="section-title">Up and running<br/>before first pitch.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Download the file</div>
+        <div class="step-desc">One HTML file. No app store. No account. Click the button and it downloads directly to your phone.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Open in Safari</div>
+        <div class="step-desc">Open the file in Safari, tap Share, then "Add to Home Screen." Done. It lives on your phone like a real app.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Log your first game</div>
+        <div class="step-desc">Enter your name, tap Add Game, fill in your stats. Your season totals, AVG, OBP, and OPS calculate automatically.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Go Platinum for the team</div>
+        <div class="step-desc">Upgrade inside the app for $5.99/mo to unlock Team Tracker, Team Chat, and custom backgrounds. Cancel anytime.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL INSTRUCTIONS -->
+<section style="background:var(--black);" id="install">
+  <div class="section-inner">
+    <div class="section-eyebrow">Install Guide</div>
+    <div class="section-title">On your phone<br/>in 60 seconds.</div>
+    <p class="section-sub">No app store. No account. Just follow these steps and it lives on your home screen like a real app.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:40px;">
+
+      <!-- iPhone -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
+        <div style="font-size:32px;margin-bottom:12px;">🍎</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;margin-bottom:16px;">iPhone</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Tap the <strong style="color:#fff;">Download Free</strong> button on this page</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">The file downloads — tap <strong style="color:#fff;">Open in Safari</strong> if prompted, or find it in your Downloads</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Tap the <strong style="color:#fff;">Share button</strong> at the bottom of Safari (box with arrow pointing up)</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Scroll down and tap <strong style="color:#fff;">"Add to Home Screen"</strong></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Tap <strong style="color:#fff;">Add</strong> — StatsForYou now lives on your home screen like a real app ✅</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
+        <div style="font-size:32px;margin-bottom:12px;">🤖</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;margin-bottom:16px;">Android</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Tap the <strong style="color:#fff;">Download Free</strong> button on this page</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Open the downloaded file in <strong style="color:#fff;">Chrome</strong></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Tap the <strong style="color:#fff;">three dots</strong> (⋮) in the top right corner of Chrome</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Tap <strong style="color:#fff;">"Add to Home Screen"</strong></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</div>
+            <div style="font-size:14px;color:#ccc;line-height:1.6;">Tap <strong style="color:#fff;">Add</strong> — StatsForYou now lives on your home screen ✅</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div style="background:linear-gradient(135deg,#1a0c00,#2a1500);border:1px solid rgba(249,115,22,.3);border-radius:16px;padding:28px 24px;">
+        <div style="font-size:32px;margin-bottom:12px;">💡</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;margin-bottom:16px;color:var(--orange);">Good to Know</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--green);font-size:16px;flex-shrink:0;">✓</span><div style="font-size:14px;color:#ccc;line-height:1.6;">Your stats are <strong style="color:#fff;">saved automatically</strong> on your device — no account needed</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--green);font-size:16px;flex-shrink:0;">✓</span><div style="font-size:14px;color:#ccc;line-height:1.6;"><strong style="color:#fff;">Works offline</strong> — no internet required once installed</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--green);font-size:16px;flex-shrink:0;">✓</span><div style="font-size:14px;color:#ccc;line-height:1.6;">Each player on a team gets <strong style="color:#fff;">their own copy</strong> of the app on their own phone</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--green);font-size:16px;flex-shrink:0;">✓</span><div style="font-size:14px;color:#ccc;line-height:1.6;">Coaches with <strong style="color:#fff;">Platinum</strong> can manage the whole team from one device</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--orange);font-size:16px;flex-shrink:0;">⚾</span><div style="font-size:14px;color:#ccc;line-height:1.6;">Rename the app "<strong style="color:#fff;">StatsForYou</strong>" when adding to home screen so it's easy to find</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section style="background:var(--surface);">
+  <div class="section-inner">
+    <div class="section-eyebrow">What They're Saying</div>
+    <div class="section-title">From the dugout.</div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"My son checks his stats every morning like box scores. He finally understands what OPS means and why it matters more than batting average. This thing is a game-changer for youth ball."</p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="testi-avatar" style="background:#f97316;">RD</div>
+          <div><div class="testi-name">Rick D.</div><div class="testi-role">Travel ball dad · 14U team</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"As a coach, I needed something simple I could share with parents without a learning curve. This is it. The team tracker and chat has replaced our group text. Everybody loves it."</p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="testi-avatar" style="background:#3b82f6;">CM</div>
+          <div><div class="testi-name">Coach Mike</div><div class="testi-role">Head coach · 16U travel team</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"I'm a freshman being looked at by a few programs. I use this to track everything so when a coach asks about my stats I know exactly what to say. The stat explanations taught me what scouts actually look at."</p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="testi-avatar" style="background:#22c55e;">JT</div>
+          <div><div class="testi-name">Jake T.</div><div class="testi-role">Player · 2027 grad · SS/RHP</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background:var(--surface);">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-eyebrow">Pricing</div>
+    <div class="section-title">Start free.<br/>Unlock everything for less<br/>than a bucket of balls.</div>
+
+    <div class="pricing-grid">
+      <!-- FREE -->
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-amt">$0</div>
+        <div class="price-note">No credit card. No expiration.</div>
+        <div class="price-divider"></div>
+        <div class="price-item"><span class="price-check">✓</span> Personal stat tracker</div>
+        <div class="price-item"><span class="price-check">✓</span> Full game log</div>
+        <div class="price-item"><span class="price-check">✓</span> Season totals (AVG, OBP, ERA…)</div>
+        <div class="price-item"><span class="price-check">✓</span> Learn the Stats library</div>
+        <div class="price-item"><span class="price-x">✗</span> Team Tracker</div>
+        <div class="price-item"><span class="price-x">✗</span> Team Chat</div>
+        <div class="price-item"><span class="price-x">✗</span> Profile photo & banners</div>
+        <a href="#download" class="price-cta free">Download Free</a>
+      </div>
+      <!-- PLATINUM -->
+      <div class="price-card featured">
+        <div class="price-name gold">⭐ Platinum</div>
+        <div style="display:flex;align-items:flex-end;gap:4px;margin-bottom:2px;">
+          <div class="price-amt gold">$5.99</div>
+          <div class="price-period">/mo</div>
+        </div>
+        <div class="price-note">7-day free trial · Cancel anytime</div>
+        <div class="price-divider"></div>
+        <div class="price-item"><span class="price-check">✓</span> Everything in Free</div>
+        <div class="price-item"><span class="price-check">✓</span> Full Team Tracker & roster</div>
+        <div class="price-item"><span class="price-check">✓</span> Team Chat (built-in messaging)</div>
+        <div class="price-item"><span class="price-check">✓</span> Profile photo upload</div>
+        <div class="price-item"><span class="price-check">✓</span> Team banner backgrounds</div>
+        <div class="price-item"><span class="price-check">✓</span> Stat depth + benchmarks</div>
+        <a href="#download" class="price-cta gold-btn">Start Free Trial →</a>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--muted);margin-top:24px;">Platinum unlocks inside the app. Download free, upgrade when you're ready.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="background:var(--black);" id="faq">
+  <div class="section-inner">
+    <div class="section-eyebrow">FAQ</div>
+    <div class="section-title">Common questions.</div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">Does this work on iPhone and Android? <span class="arrow">+</span></div>
+        <div class="faq-a">Yes. It's a single HTML file that opens in any mobile browser. On iPhone, open it in Safari and tap "Add to Home Screen." On Android, open in Chrome and tap "Add to Home Screen." It works exactly like an app on both.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need to create an account? <span class="arrow">+</span></div>
+        <div class="faq-a">Nope. No account, no sign-in, no email required. Your stats save directly to your phone. Everything stays on your device.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does Platinum work? <span class="arrow">+</span></div>
+        <div class="faq-a">You download the free app, then upgrade to Platinum inside the app for $5.99/month. You get a 7-day free trial. Cancel anytime — no commitment.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can a coach use this for a whole team? <span class="arrow">+</span></div>
+        <div class="faq-a">Yes — that's exactly what Platinum's Team Tracker is built for. Add your full roster, track each player's stats game-by-game, see team leaderboards, and use Team Chat to message the group. One coach with Platinum can manage the whole roster.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What stats does it track? <span class="arrow">+</span></div>
+        <div class="faq-a">Batting: AB, H, 1B, 2B, 3B, HR, RBI, R, BB, K, HBP, SB, CS, SAC, E — plus auto-calculated AVG, OBP, SLG, and OPS. Pitching: IP, ER, H, BB, SO — plus auto-calculated ERA and WHIP. All 17 stats are also explained in the Learn section.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Will my data transfer if I get a new phone? <span class="arrow">+</span></div>
+        <div class="faq-a">Stats are saved to your device's local storage. If you switch phones, you'd start fresh — but you can always look up your old game-by-game history before switching and note your season totals.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<div class="cta-banner" id="download">
+  <h2>Your season is<br/><span>already in progress.</span></h2>
+  <p>Start tracking today. Free, forever. Upgrade when your team is ready.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="StatsForYou-v3.html" download class="btn-primary" style="font-size:17px;padding:16px 36px;">⬇ Download Free</a>
+    <a href="#pricing" class="btn-secondary" style="font-size:17px;padding:16px 28px;">See Platinum →</a>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-top:20px;">No app store. No account. Works on any phone in under 60 seconds.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">StatsForYou</div>
+  <div class="footer-tagline">The baseball stat tracker built for athletes who want to play at the next level.</div>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="#download">Download</a>
+  </div>
+  <div class="footer-copy">© 2026 StatsForYou. Built for the game.</div>
+</footer>
+
+<script>
+// ── SCOREBOARD TICKER ──────────────────────────────────────────────────────
+function animateTicker(el, targetStr, duration, formatter){
+  const start = performance.now();
+  const target = parseFloat(targetStr);
+  function update(now){
+    const p = Math.min((now-start)/duration, 1);
+    const ease = 1 - Math.pow(1-p, 3);
+    const val = target * ease;
+    el.textContent = formatter(val);
+    if(p < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    animateTicker(document.getElementById('t-avg'), 0.327, 1800, v=>{
+      const n = Math.round(v*1000);
+      return '.'+String(n).padStart(3,'0');
+    });
+    animateTicker(document.getElementById('t-hr'), 9, 1600, v=>Math.floor(v));
+    animateTicker(document.getElementById('t-rbi'), 38, 1700, v=>Math.floor(v));
+  }, 400);
+});
+
+// ── FAQ ACCORDION ──────────────────────────────────────────────────────────
+document.querySelectorAll('.faq-item').forEach(item=>{
+  item.querySelector('.faq-q').addEventListener('click',()=>{
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!isOpen) item.classList.add('open');
+  });
+});
+
+// ── SCROLL FADE-IN ─────────────────────────────────────────────────────────
+const obs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity='1';
+      e.target.style.transform='translateY(0)';
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:0.12});
+
+document.querySelectorAll('.feat-card,.testi-card,.step,.price-card,.stat-cell').forEach(el=>{
+  el.style.opacity='0';
+  el.style.transform='translateY(20px)';
+  el.style.transition='opacity .5s ease, transform .5s ease';
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
