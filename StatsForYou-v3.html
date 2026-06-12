@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="StatsForYou"/>
+<title>StatsForYou</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#fff;overflow-x:hidden;}
+::-webkit-scrollbar{width:0;}
+input[type=number]::-webkit-inner-spin-button{opacity:.4;}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5);}
+textarea{resize:none;}
+
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;position:relative;}
+.screen{flex:1;overflow-y:auto;padding-bottom:80px;min-height:calc(100vh - 80px);}
+
+/* TOPBAR */
+.topbar{background:rgba(13,13,13,.92);backdrop-filter:blur(10px);border-bottom:1px solid #1e1e1e;padding:16px 18px 12px;position:sticky;top:0;z-index:20;}
+.topbar-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;letter-spacing:.5px;color:#fff;}
+.topbar-sub{font-size:10px;color:#555;margin-top:1px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+
+/* BOTTOM NAV */
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,10,10,.97);border-top:1px solid #1e1e1e;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 2px 7px;cursor:pointer;gap:3px;border:none;background:none;color:#444;font-size:8.5px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:color .15s;}
+.nav-item.active{color:#f97316;}
+.nav-icon{font-size:19px;line-height:1;}
+
+/* CARDS */
+.card{background:#161616;border:1px solid #222;border-radius:14px;padding:16px;}
+.section-label{font-size:10px;font-weight:700;color:#555;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+
+/* STAT GRID */
+.stat-box{background:#161616;border:1px solid #222;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:border-color .15s;}
+.stat-box:active{border-color:#f97316;}
+.stat-box.sl:active{border-color:#94a3b8;}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:800;color:#f97316;line-height:1;}
+.stat-val.sl{color:#cbd5e1;}
+.stat-lbl{font-size:9.5px;color:#555;font-weight:700;margin-top:2px;letter-spacing:.05em;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+
+/* INPUTS */
+.field{width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:9px 12px;color:#fff;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;}
+.field:focus{border-color:#f97316;}
+.field-label{font-size:11px;color:#666;margin-bottom:4px;font-weight:600;letter-spacing:.04em;}
+
+/* BUTTONS */
+.btn{border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;border-radius:10px;transition:all .15s;}
+.btn-primary{background:#f97316;color:#000;font-size:15px;padding:13px 20px;width:100%;}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-ghost{background:#1e1e1e;color:#f97316;font-size:13px;padding:8px 14px;border:1px solid #2a2a2a;}
+.btn-danger{background:#1e1e1e;color:#f87171;font-size:13px;padding:8px 14px;border:1px solid #2a2a2a;}
+.btn-gold{background:linear-gradient(135deg,#b38600,#f0b800);color:#000;font-size:15px;padding:13px 20px;width:100%;font-weight:800;}
+
+/* TABS */
+.tab-bar{display:flex;background:#111;border-radius:10px;padding:3px;gap:2px;margin-bottom:16px;}
+.tab-btn{flex:1;padding:8px 4px;border:none;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;text-transform:capitalize;transition:all .15s;}
+.tab-btn.on{background:#f97316;color:#000;}
+.tab-btn.off{background:transparent;color:#555;}
+
+/* ROWS */
+.game-row{background:#161616;border:1px solid #222;border-radius:12px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s;}
+.game-row:active{border-color:#333;}
+.player-row{background:#161616;border:1px solid #222;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;}
+
+/* AVATAR */
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#000;flex-shrink:0;overflow:hidden;background:#f97316;}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+/* LEARN */
+.learn-card{background:#161616;border:1px solid #222;border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s;}
+.learn-card:active{border-color:#f97316;}
+
+/* PLATINUM */
+.plat-hero{background:linear-gradient(135deg,#1a1200 0%,#2d1f00 50%,#1a1200 100%);border:1px solid #c9980040;border-radius:18px;padding:28px 20px;text-align:center;}
+.plat-feat{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #1e1e1e;}
+.plat-feat:last-child{border-bottom:none;}
+
+/* PROFILE */
+.prof-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #1a1a1a;}
+.prof-row:last-child{border-bottom:none;}
+
+/* CHAT */
+.chat-container{display:flex;flex-direction:column;height:calc(100vh - 130px);padding-bottom:0;}
+.chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.msg-bubble{max-width:75%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;}
+.msg-mine{background:#f97316;color:#000;border-bottom-right-radius:4px;align-self:flex-end;}
+.msg-other{background:#1e1e1e;color:#fff;border-bottom-left-radius:4px;align-self:flex-start;}
+.msg-sys{text-align:center;font-size:11px;color:#444;font-weight:600;padding:4px 0;}
+.chat-input-bar{display:flex;gap:8px;padding:10px 14px 12px;background:rgba(13,13,13,.95);border-top:1px solid #1e1e1e;position:sticky;bottom:60px;}
+
+/* BANNER BG */
+.banner-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0;opacity:.18;}
+.banner-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(13,13,13,.3) 0%,rgba(13,13,13,.95) 55%);z-index:1;}
+.banner-content{position:relative;z-index:2;}
+
+/* UTILS */
+.back-btn{background:none;border:none;color:#f97316;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px;padding:0;font-weight:600;}
+.pp{padding:18px;}
+.mb8{margin-bottom:8px;}
+.mb12{margin-bottom:12px;}
+.mb16{margin-bottom:16px;}
+.mb20{margin-bottom:20px;}
+.mt12{margin-top:12px;}
+.mt16{margin-top:16px;}
+.mt20{margin-top:20px;}
+.fb{display:flex;align-items:center;justify-content:space-between;}
+.empty{text-align:center;padding:44px 20px;color:#3a3a3a;}
+
+/* PHOTO UPLOAD */
+.photo-upload-area{border:2px dashed #333;border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:#111;}
+.photo-upload-area:hover{border-color:#f97316;}
+.photo-ring{border:3px solid #f97316;border-radius:50%;padding:3px;}
+
+/* BADGE */
+.plat-badge-pill{background:#c9980020;border:1px solid #c99800;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:#c99800;letter-spacing:.08em;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback}=React;
+
+// ── STAT DATA ─────────────────────────────────────────────────────────────────
+const STAT_LEARN=[
+  {key:"AVG",name:"Batting Average",tag:"batting",formula:"H ÷ AB",short:"How often you get a hit per at-bat.",deep:"Batting average is the oldest offensive stat in baseball. A .300 AVG is the traditional benchmark for excellence — meaning you get a hit 30% of the time. While it's still widely used, AVG doesn't distinguish between a single and a home run, which is why advanced stats like SLG and OPS were developed. A .250 AVG is league average. Below .200 puts a player's spot in the lineup in question.",impact:"AVG directly affects lineup position. Players hitting above .300 typically bat 2nd–4th in the order where they see the most at-bats with runners on base.",benchmarks:[["Elite",".330+","#4ade80"],["Excellent",".300–.329","#86efac"],["Solid",".270–.299","#fb923c"],["Average",".250–.269","#fbbf24"],["Struggling","Below .250","#f87171"]]},
+  {key:"OBP",name:"On-Base Percentage",tag:"batting",formula:"(H+BB+HBP)÷(AB+BB+HBP+SAC)",short:"How often you reach base by any means.",deep:"OBP is considered by most modern analysts to be more valuable than batting average because it counts walks and HBPs — things that get you on base without a hit. A player who draws lots of walks is extending innings and creating run-scoring opportunities even without hitting well. .400+ OBP is elite at any level. .350 is solid. Below .300 means you're making outs too frequently.",impact:"High OBP players are among the most valuable in any lineup. Getting on base is the first requirement for scoring — every run scored requires at least one player to reach base first.",benchmarks:[["Elite",".400+","#4ade80"],["Excellent",".380–.399","#86efac"],["Solid",".350–.379","#fb923c"],["Average",".320–.349","#fbbf24"],["Struggling","Below .300","#f87171"]]},
+  {key:"SLG",name:"Slugging Percentage",tag:"batting",formula:"Total Bases ÷ AB",short:"Measures your power at the plate.",deep:"Slugging gives weighted credit for extra-base hits. A single = 1 base. Double = 2. Triple = 3. Home run = 4. Divide total bases by at-bats and you have slugging. A .500 SLG is excellent — it means you're averaging half a base per at-bat. Power hitters with lots of doubles and home runs will post high SLG even with modest batting averages.",impact:"SLG separates contact hitters from power hitters. Coaches use SLG to determine where in the lineup a player bats — high SLG players often hit 3rd or 4th to drive in runs.",benchmarks:[["Elite",".550+","#4ade80"],["Excellent",".500–.549","#86efac"],["Solid",".450–.499","#fb923c"],["Average",".400–.449","#fbbf24"],["Struggling","Below .350","#f87171"]]},
+  {key:"OPS",name:"OPS",tag:"advanced",formula:"OBP + SLG",short:"The most used single-number offensive measure.",deep:"OPS combines the two most important offensive skills — getting on base and hitting for power — into one number. It's become the standard quick-reference stat for evaluating hitters. .900+ is excellent. .800+ is above average. .700+ is league average. Below .650 suggests a hitter is struggling.",impact:"OPS is the first number scouts look at when evaluating a hitter. A high OPS means you both get on base and hit with authority — the combination that creates the most runs.",benchmarks:[["Elite",".950+","#4ade80"],["Excellent",".900–.949","#86efac"],["Solid",".800–.899","#fb923c"],["Average",".700–.799","#fbbf24"],["Struggling","Below .700","#f87171"]]},
+  {key:"ERA",name:"Earned Run Average",tag:"pitching",formula:"(ER × 9) ÷ IP",short:"Average earned runs allowed per 9 innings.",deep:"ERA is the primary measure of pitching effectiveness. It calculates how many earned runs a pitcher would allow in a theoretical 9-inning complete game. Under 2.00 is elite. 2.00–3.00 is excellent. 3.00–4.00 is solid. 4.00–5.00 is average. Above 5.00 signals struggles.",impact:"ERA is the first stat scouts and coaches look at when evaluating pitchers. It's the baseline for determining whether a pitcher should be in the rotation, bullpen, or needs additional development.",benchmarks:[["Elite","Under 2.00","#4ade80"],["Excellent","2.00–3.00","#86efac"],["Solid","3.00–4.00","#fb923c"],["Average","4.00–5.00","#fbbf24"],["Struggling","Above 5.00","#f87171"]]},
+  {key:"WHIP",name:"WHIP",tag:"pitching",formula:"(BB + H) ÷ IP",short:"Baserunners allowed per inning pitched.",deep:"WHIP measures how many baserunners a pitcher allows per inning, regardless of whether they score. Under 1.00 is elite — meaning less than one baserunner per inning on average. 1.00–1.20 is excellent. 1.20–1.40 is average. Above 1.50 indicates consistent baserunner traffic.",impact:"A low WHIP means fewer runners, fewer decisions to make with the pitch count, and less stress on the defense. Pitchers with low WHIPs last longer in games.",benchmarks:[["Elite","Under 1.00","#4ade80"],["Excellent","1.00–1.10","#86efac"],["Solid","1.10–1.25","#fb923c"],["Average","1.25–1.40","#fbbf24"],["Struggling","Above 1.50","#f87171"]]},
+  {key:"AB",name:"At Bats",tag:"batting",formula:"PA − (BB+HBP+SAC+CI)",short:"Plate appearances that count against your average.",deep:"An at-bat is recorded when a batter gets a hit, makes an out on a batted ball, or strikes out. Walks, HBPs, and sacrifices do NOT count as at-bats. More at-bats means more data for your average to stabilize.",impact:"Accumulating at-bats is how your season stats develop. More ABs give a more accurate picture of your true ability, since small samples can be misleading early in a season.",benchmarks:null},
+  {key:"H",name:"Hits",tag:"batting",formula:"1B + 2B + 3B + HR",short:"Times you reached base via a batted ball.",deep:"A hit is recorded any time a batter reaches base safely on a batted ball without an error or fielder's choice. Hits include singles, doubles, triples, and home runs.",impact:"Hits are the foundation of offensive production. They advance runners, create scoring opportunities, and drive batting average — the most publicly recognized offensive stat.",benchmarks:null},
+  {key:"HR",name:"Home Runs",tag:"batting",formula:"Count of HR",short:"The most impactful single swing in baseball.",deep:"A home run scores at least one run guaranteed — the batter plus anyone on base. Power is increasingly valued at all levels. 20+ HR in a full season is considered a power milestone.",impact:"Home runs have the highest run value of any event in baseball. A player who hits for power changes how an entire opposing pitching staff approaches the game.",benchmarks:null},
+  {key:"RBI",name:"Runs Batted In",tag:"batting",formula:"Count per run driven in",short:"Runs your plate appearance directly caused.",deep:"An RBI is credited when a batter's plate appearance results in a run scoring. RBI is context-dependent — a player batting with runners on base consistently will have more opportunities.",impact:"RBI is one of the most watched traditional stats. It's a measure of situational hitting — performing when it matters most, with runners on base.",benchmarks:null},
+  {key:"BB",name:"Walks",tag:"batting",formula:"4 balls in one PA",short:"Free passes that extend innings.",deep:"A walk occurs when a pitcher throws 4 balls in one plate appearance. Walks are underrated at youth levels but become increasingly valued as players advance. Drawing walks means you have plate discipline.",impact:"Players who walk frequently keep innings alive, raise their OBP, and force pitchers to throw more pitches — wearing down the starter and getting into the bullpen earlier.",benchmarks:null},
+  {key:"K",name:"Strikeouts",tag:"batting",formula:"3 strikes without ball in play",short:"Outs that give the defense nothing to work with.",deep:"A strikeout occurs when a batter accumulates 3 strikes without putting the ball in play. Unlike other outs, a strikeout gives baserunners no chance to advance.",impact:"High strikeout rates are increasingly penalized by advanced analytics because they produce zero advancement opportunities. Reducing strikeouts is often the first thing coaches target.",benchmarks:null},
+  {key:"SB",name:"Stolen Bases",tag:"batting",formula:"Successful steal attempts",short:"Speed as an offensive weapon.",deep:"A stolen base is awarded when a runner advances a base without a batted ball while the pitcher delivers. A 70%+ success rate is the break-even point.",impact:"Speed creates pressure on pitchers and catchers. A fast runner on first changes pitch selection and shortens the catcher's throwing window.",benchmarks:null},
+  {key:"IP",name:"Innings Pitched",tag:"pitching",formula:"Outs recorded ÷ 3",short:"How deep into the game you pitched.",deep:"Each out recorded counts as 1/3 of an inning, displayed with decimals (5.2 = 5 innings and 2 outs). Pitching deep into games saves the bullpen and reflects durability.",impact:"Pitchers who go deep into games (6+ innings) are among the most valuable players on any roster. They protect the bullpen and give their team the best chance to win.",benchmarks:null},
+  {key:"SO",name:"Strikeouts (Pitching)",tag:"pitching",formula:"Batters retired via 3 strikes",short:"The cleanest out in baseball.",deep:"A pitcher's strikeout total reflects their ability to miss bats. K/9 (strikeouts per 9 innings) is the normalized rate — calculated as (SO × 9) ÷ IP. 8.0+ K/9 is good. 10.0+ is elite.",impact:"High-strikeout pitchers can escape jams without relying on defense, making them coveted at every level of play.",benchmarks:null},
+];
+
+const BATTING_INPUTS=["AB","H","1B","2B","3B","HR","RBI","R","BB","K","HBP","SB","CS","SAC","E"];
+const PITCHING_INPUTS=["IP","ER","H","BB","SO"];
+const STAT_NAMES={AB:"At Bats",H:"Hits","1B":"Singles","2B":"Doubles","3B":"Triples",HR:"Home Runs",RBI:"RBI",R:"Runs",BB:"Walks",K:"Strikeouts",HBP:"Hit By Pitch",SB:"Stolen Bases",CS:"Caught Stealing",SAC:"Sacrifice",E:"Errors",IP:"Innings Pitched",ER:"Earned Runs",SO:"Strikeouts"};
+const emptyB=()=>Object.fromEntries(BATTING_INPUTS.map(s=>[s,""]));
+const emptyP=()=>Object.fromEntries(PITCHING_INPUTS.map(s=>[s,""]));
+
+function calcB(t){
+  const ab=+t.AB||0,h=+t.H||0,bb=+t.BB||0,hbp=+t.HBP||0,sac=+t.SAC||0;
+  const b1=+t["1B"]||0,b2=+t["2B"]||0,b3=+t["3B"]||0,hr=+t.HR||0;
+  const avg=ab>0?h/ab:null;
+  const obp=(ab+bb+hbp+sac)>0?(h+bb+hbp)/(ab+bb+hbp+sac):null;
+  const slg=ab>0?(b1+2*b2+3*b3+4*hr)/ab:null;
+  const ops=obp!==null&&slg!==null?obp+slg:null;
+  return{avg,obp,slg,ops};
+}
+function calcP(t){
+  const ip=+t.IP||0,er=+t.ER||0,h=+t.H||0,bb=+t.BB||0;
+  return{era:ip>0?er*9/ip:null,whip:ip>0?(h+bb)/ip:null};
+}
+function fmt(v,d=3){if(v===null||v===undefined||isNaN(v))return"—";return v.toFixed(d);}
+function fmtA(v){if(v===null||v===undefined||isNaN(v))return"—";return"."+Math.round(v*1000).toString().padStart(3,"0");}
+function sumField(games,field){return games.reduce((acc,g)=>{const src=g[field]||{};Object.keys(src).forEach(k=>{acc[k]=(acc[k]||0)+(+src[k]||0);});return acc;},{});}
+function initials(name){if(!name||!name.trim())return"?";return name.trim().split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);}
+function ls(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function lss(k,d){try{return localStorage.getItem(k)||d;}catch{return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,typeof v==="string"?v:JSON.stringify(v));}catch{}}
+
+const AVATAR_COLORS=["#f97316","#3b82f6","#22c55e","#a855f7","#ec4899","#14b8a6","#eab308","#ef4444"];
+
+// ── SHARED COMPONENTS ─────────────────────────────────────────────────────────
+
+function Avatar({src,name,size=36,colorIdx=0,style={}}){
+  const fs=Math.round(size*0.42);
+  return(
+    <div className="avatar" style={{width:size,height:size,fontSize:fs,background:src?"transparent":AVATAR_COLORS[colorIdx%AVATAR_COLORS.length],...style}}>
+      {src?<img src={src} alt={name}/>:initials(name||"")}
+    </div>
+  );
+}
+
+function StatBox({label,value,sl}){
+  return(
+    <div className={`stat-box${sl?" sl":""}`}>
+      <div className={`stat-val${sl?" sl":""}`}>{value}</div>
+      <div className="stat-lbl">{label}</div>
+    </div>
+  );
+}
+
+function GameForm({game,onSave,onBack}){
+  const [tab,setTab]=useState("batting");
+  const [form,setForm]=useState(game?
+    {date:game.date,opponent:game.opponent,result:game.result||"",batting:{...emptyB(),...game.batting},pitching:{...emptyP(),...game.pitching}}:
+    {date:new Date().toISOString().slice(0,10),opponent:"",result:"",batting:emptyB(),pitching:emptyP()}
+  );
+  return(
+    <div className="pp">
+      <button className="back-btn mb12" onClick={onBack} style={{marginBottom:16}}>← Back</button>
+      <div style={{fontSize:20,fontWeight:800,marginBottom:18}}>{game?"Edit Game":"Add Game"}</div>
+      <div className="g2 mb16">
+        <div><div className="field-label">Date</div><input type="date" className="field" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))}/></div>
+        <div><div className="field-label">Opponent</div><input type="text" className="field" placeholder="Team name" value={form.opponent} onChange={e=>setForm(f=>({...f,opponent:e.target.value}))}/></div>
+      </div>
+      <div className="mb16"><div className="field-label">Result (e.g. W 5-3)</div><input type="text" className="field" placeholder="Optional" value={form.result} onChange={e=>setForm(f=>({...f,result:e.target.value}))}/></div>
+      <div className="tab-bar">
+        {["batting","pitching"].map(t=><button key={t} className={`tab-btn ${tab===t?"on":"off"}`} onClick={()=>setTab(t)}>{t}</button>)}
+      </div>
+      {tab==="batting"&&<div className="g3 mb16">{BATTING_INPUTS.map(s=>(
+        <div key={s}><div className="field-label">{s} · {STAT_NAMES[s]}</div><input type="number" min="0" placeholder="0" className="field" value={form.batting[s]} onChange={e=>setForm(f=>({...f,batting:{...f.batting,[s]:e.target.value}}))}/></div>
+      ))}</div>}
+      {tab==="pitching"&&<div className="g3 mb16">{PITCHING_INPUTS.map(s=>(
+        <div key={s}><div className="field-label">{s} · {STAT_NAMES[s]}</div><input type="number" min="0" step={s==="IP"?"0.1":"1"} placeholder="0" className="field" value={form.pitching[s]} onChange={e=>setForm(f=>({...f,pitching:{...f.pitching,[s]:e.target.value}}))}/></div>
+      ))}</div>}
+      <button className="btn btn-primary" disabled={!form.date||!form.opponent} onClick={()=>onSave(form)}>{game?"Save Changes":"Add Game"}</button>
+    </div>
+  );
+}
+
+function PhotoPicker({label,current,onPick,size=80,hint}){
+  const ref=useRef();
+  return(
+    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:10}}>
+      <div className="photo-ring" style={{cursor:"pointer"}} onClick={()=>ref.current.click()}>
+        {current
+          ?<img src={current} style={{width:size,height:size,borderRadius:"50%",objectFit:"cover"}} alt="photo"/>
+          :<div style={{width:size,height:size,borderRadius:"50%",background:"#1e1e1e",display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.35,color:"#555"}}>📷</div>
+        }
+      </div>
+      <button className="btn btn-ghost" style={{fontSize:12,padding:"6px 14px"}} onClick={()=>ref.current.click()}>{label}</button>
+      {hint&&<div style={{fontSize:11,color:"#555",textAlign:"center"}}>{hint}</div>}
+      <input ref={ref} type="file" accept="image/*" style={{display:"none"}} onChange={e=>{
+        const file=e.target.files[0];if(!file)return;
+        const reader=new FileReader();
+        reader.onload=ev=>onPick(ev.target.result);
+        reader.readAsDataURL(file);
+        e.target.value="";
+      }}/>
+    </div>
+  );
+}
+
+function BannerPicker({label,current,onPick}){
+  const ref=useRef();
+  return(
+    <div>
+      <div className="field-label" style={{marginBottom:8}}>{label}</div>
+      <div className="photo-upload-area" onClick={()=>ref.current.click()} style={{position:"relative",overflow:"hidden",minHeight:80}}>
+        {current
+          ?<img src={current} style={{width:"100%",height:80,objectFit:"cover",borderRadius:10,display:"block"}} alt="banner"/>
+          :<div style={{color:"#555",fontSize:13}}>
+            <div style={{fontSize:28,marginBottom:4}}>🖼️</div>
+            <div>Tap to upload team banner or photo</div>
+            <div style={{fontSize:11,marginTop:4,color:"#444"}}>Shows as background on your stats & chat screens</div>
+          </div>
+        }
+        {current&&<div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"#fff"}}>Tap to change</div>}
+      </div>
+      <input ref={ref} type="file" accept="image/*" style={{display:"none"}} onChange={e=>{
+        const file=e.target.files[0];if(!file)return;
+        const reader=new FileReader();
+        reader.onload=ev=>onPick(ev.target.result);
+        reader.readAsDataURL(file);
+        e.target.value="";
+      }}/>
+    </div>
+  );
+}
+
+// ── MY STATS SCREEN ───────────────────────────────────────────────────────────
+
+function MyStatsScreen({platinum,profilePhoto,statsBanner}){
+  const [games,setGames]=useState(()=>ls("sfy_games",[]));
+  const [player,setPlayer]=useState(()=>lss("sfy_player",""));
+  const [sv,setSv]=useState("dash");
+  const [editGame,setEditGame]=useState(null);
+  const [selGame,setSelGame]=useState(null);
+  const [delC,setDelC]=useState(false);
+
+  useEffect(()=>lsSet("sfy_games",games),[games]);
+
+  const sorted=[...games].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const bt=sumField(games,"batting"),pt=sumField(games,"pitching");
+  const bs=calcB(bt),ps=calcP(pt);
+
+  function saveGame(form){
+    const entry={id:editGame?.id||Date.now().toString(),...form};
+    setGames(prev=>editGame?prev.map(g=>g.id===editGame.id?entry:g):[...prev,entry]);
+    setSv("dash");setEditGame(null);
+  }
+  function delGame(){setGames(prev=>prev.filter(g=>g.id!==selGame.id));setSv("dash");setSelGame(null);setDelC(false);}
+
+  if(sv==="addGame") return <div className="screen"><GameForm onSave={saveGame} onBack={()=>setSv("dash")}/></div>;
+  if(sv==="editGame"&&editGame) return <div className="screen"><GameForm game={editGame} onSave={saveGame} onBack={()=>{setSv("dash");setEditGame(null);}}/></div>;
+
+  if(sv==="gameDetail"&&selGame){
+    const g=selGame,gs=calcB(g.batting),gp=calcP(g.pitching);
+    const bStats=BATTING_INPUTS.filter(s=>+g.batting[s]>0);
+    return(
+      <div className="screen">
+        <div className="pp">
+          <button className="back-btn mb12" style={{marginBottom:16}} onClick={()=>setSv("dash")}>← Back</button>
+          <div className="fb mb20">
+            <div><div style={{fontSize:20,fontWeight:800}}>vs. {g.opponent}</div><div style={{fontSize:12,color:"#666",marginTop:2}}>{g.date}{g.result?` · ${g.result}`:""}</div></div>
+            <div style={{display:"flex",gap:8}}>
+              <button className="btn btn-ghost" onClick={()=>{setEditGame(g);setSv("editGame");}}>Edit</button>
+              <button className="btn btn-danger" onClick={()=>setDelC(true)}>Delete</button>
+            </div>
+          </div>
+          {delC&&<div style={{background:"#1c0808",border:"1px solid #7f1d1d",borderRadius:12,padding:16,marginBottom:16}}>
+            <div style={{fontSize:14,marginBottom:12,color:"#fca5a5"}}>Delete this game? Can't be undone.</div>
+            <div style={{display:"flex",gap:8}}>
+              <button className="btn btn-primary" style={{background:"#dc2626",flex:1}} onClick={delGame}>Yes, delete</button>
+              <button className="btn btn-ghost" style={{flex:1}} onClick={()=>setDelC(false)}>Cancel</button>
+            </div>
+          </div>}
+          <div className="section-label">Batting</div>
+          {bStats.length>0?<div className="g4 mb8">{bStats.map(s=><div key={s} className="stat-box"><div className="stat-val">{g.batting[s]||0}</div><div className="stat-lbl">{s}</div></div>)}</div>:<div style={{color:"#444",fontSize:13,marginBottom:8}}>No batting stats.</div>}
+          <div className="g4 mb20">{[["AVG",fmtA(gs.avg)],["OBP",fmtA(gs.obp)],["SLG",fmtA(gs.slg)],["OPS",fmt(gs.ops,3)]].map(([k,v])=><div key={k} className="stat-box"><div className="stat-val">{v}</div><div className="stat-lbl">{k}</div></div>)}</div>
+          <div className="section-label">Pitching</div>
+          <div className="g3 mb8">{PITCHING_INPUTS.map(s=><div key={s} className="stat-box sl"><div className="stat-val sl">{g.pitching[s]||0}</div><div className="stat-lbl">{s}</div></div>)}</div>
+          <div className="g2">{[["ERA",fmt(gp.era,2)],["WHIP",fmt(gp.whip,2)]].map(([k,v])=><div key={k} className="stat-box sl"><div className="stat-val sl">{v}</div><div className="stat-lbl">{k}</div></div>)}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div className="screen" style={{position:"relative"}}>
+      {/* Banner */}
+      {statsBanner&&<><div className="banner-bg" style={{backgroundImage:`url(${statsBanner})`}}/><div className="banner-overlay"/></>}
+
+      <div style={{position:"relative",zIndex:2}}>
+        <div className="topbar" style={{background:statsBanner?"rgba(13,13,13,.85)":"rgba(13,13,13,.92)"}}>
+          <div className="fb">
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <Avatar src={profilePhoto} name={player} size={36} colorIdx={0}/>
+              <div>
+                <div className="topbar-title">StatsForYou</div>
+                <div className="topbar-sub">{player||"My Season"}</div>
+              </div>
+            </div>
+            {platinum&&<div className="plat-badge-pill">PLATINUM</div>}
+          </div>
+        </div>
+
+        <div className="pp">
+          <div className="section-label">Season Batting</div>
+          <div className="g4 mb8">
+            {[["AVG",fmtA(bs.avg)],["OBP",fmtA(bs.obp)],["SLG",fmtA(bs.slg)],["OPS",fmt(bs.ops,3)]].map(([k,v])=><StatBox key={k} label={k} value={v}/>)}
+          </div>
+          <div className="g5 mb20">
+            {[["AB",bt.AB||0],["H",bt.H||0],["HR",bt.HR||0],["RBI",bt.RBI||0],["BB",bt.BB||0]].map(([k,v])=><StatBox key={k} label={k} value={v}/>)}
+          </div>
+          <div className="section-label">Season Pitching</div>
+          <div className="g4 mb20">
+            {[["IP",pt.IP||0],["ERA",fmt(ps.era,2)],["WHIP",fmt(ps.whip,2)],["K",pt.SO||0]].map(([k,v])=><StatBox key={k} label={k} value={v} sl/>)}
+          </div>
+          <div className="fb mb12">
+            <div className="section-label" style={{marginBottom:0}}>Game Log</div>
+            <button className="btn btn-primary" style={{width:"auto",padding:"7px 16px",fontSize:13}} onClick={()=>setSv("addGame")}>+ Add Game</button>
+          </div>
+          {sorted.length===0&&<div className="empty"><div style={{fontSize:40,marginBottom:10}}>⚾</div><div style={{fontSize:14,lineHeight:1.6}}>No games yet.<br/>Tap <strong>+ Add Game</strong> to start.</div></div>}
+          {sorted.map(g=>(
+            <div key={g.id} className="game-row mb8" onClick={()=>{setSelGame(g);setSv("gameDetail");}}>
+              <div><div style={{fontWeight:700,fontSize:15}}>vs. {g.opponent}</div><div style={{fontSize:12,color:"#555",marginTop:2}}>{g.date}{g.result?` · ${g.result}`:""}</div></div>
+              <div style={{display:"flex",gap:14,alignItems:"center"}}>
+                <div style={{textAlign:"right"}}><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:19,fontWeight:800,color:"#f97316"}}>{g.batting.H||0}-{g.batting.AB||0}</div><div style={{fontSize:10,color:"#444"}}>H-AB</div></div>
+                <div style={{textAlign:"right"}}><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:19,fontWeight:800,color:"#f97316"}}>{g.batting.RBI||0}</div><div style={{fontSize:10,color:"#444"}}>RBI</div></div>
+                <div style={{color:"#444"}}>›</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── LEARN SCREEN ──────────────────────────────────────────────────────────────
+
+function LearnScreen(){
+  const [filter,setFilter]=useState("all");
+  const [sel,setSel]=useState(null);
+  const visible=filter==="all"?STAT_LEARN:STAT_LEARN.filter(s=>s.tag===filter);
+  const tagStyle={batting:{bg:"#3a1500",color:"#fb923c"},pitching:{bg:"#0f1e33",color:"#93c5fd"},advanced:{bg:"#1a1a2e",color:"#a78bfa"}};
+
+  if(sel){
+    const ts=tagStyle[sel.tag];
+    return(
+      <div className="screen">
+        <div className="topbar"><button className="back-btn" onClick={()=>setSel(null)}>← Back</button></div>
+        <div className="pp">
+          <div style={{display:"inline-block",background:ts.bg,color:ts.color,borderRadius:20,padding:"3px 12px",fontSize:10,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",marginBottom:10}}>{sel.tag}</div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:44,fontWeight:900,color:"#f97316",lineHeight:1}}>{sel.key}</div>
+          <div style={{fontSize:18,fontWeight:700,margin:"6px 0 4px"}}>{sel.name}</div>
+          <div style={{fontSize:12,color:"#555",marginBottom:18}}>Formula: <span style={{color:"#888",fontFamily:"monospace"}}>{sel.formula}</span></div>
+          <div className="card mb12"><div className="section-label">What It Means</div><div style={{fontSize:14,color:"#ccc",lineHeight:1.75}}>{sel.deep}</div></div>
+          <div className="card mb12" style={{borderColor:"#1e3a1e"}}><div style={{fontSize:10,fontWeight:700,color:"#4ade80",letterSpacing:".08em",textTransform:"uppercase",marginBottom:8}}>⚡ Impact on Your Game</div><div style={{fontSize:14,color:"#ccc",lineHeight:1.75}}>{sel.impact}</div></div>
+          {sel.benchmarks&&<div className="card"><div className="section-label">Benchmarks</div>{sel.benchmarks.map(([l,v,c])=><div key={l} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #1a1a1a"}}><span style={{fontSize:13,color:"#888"}}>{l}</span><span style={{fontSize:13,fontWeight:700,color:c}}>{v}</span></div>)}</div>}
+          <div className="mt16">
+            <div className="section-label">Other Stats</div>
+            <div className="g3">{STAT_LEARN.filter(s=>s.key!==sel.key).slice(0,9).map(s=><button key={s.key} onClick={()=>setSel(s)} style={{background:"#161616",border:"1px solid #222",borderRadius:8,padding:"9px 4px",color:"#f97316",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:16,cursor:"pointer"}}>{s.key}</button>)}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div className="screen">
+      <div className="topbar"><div className="topbar-title">Learn the Stats</div><div className="topbar-sub">Tap any stat to go deep</div></div>
+      <div className="pp">
+        <div className="tab-bar">{["all","batting","pitching","advanced"].map(f=><button key={f} className={`tab-btn ${filter===f?"on":"off"}`} onClick={()=>setFilter(f)}>{f}</button>)}</div>
+        {visible.map(s=>{const ts=tagStyle[s.tag];return(
+          <div key={s.key} className="learn-card mb8" onClick={()=>setSel(s)}>
+            <div style={{display:"inline-block",background:ts.bg,color:ts.color,borderRadius:20,padding:"2px 10px",fontSize:10,fontWeight:700,textTransform:"uppercase",marginBottom:6}}>{s.tag}</div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:26,fontWeight:900,color:"#f97316",lineHeight:1}}>{s.key}</div><div style={{fontSize:13,fontWeight:600,color:"#ccc",marginTop:2}}>{s.name}</div><div style={{fontSize:12,color:"#555",marginTop:3,lineHeight:1.5}}>{s.short}</div></div>
+              <div style={{color:"#333",fontSize:22,marginLeft:10}}>›</div>
+            </div>
+          </div>
+        );})}
+      </div>
+    </div>
+  );
+}
+
+// ── TEAM + CHAT SCREEN ────────────────────────────────────────────────────────
+
+function TeamScreen({platinum,onUpgrade,profilePhoto,chatBanner}){
+  const [players,setPlayers]=useState(()=>ls("sfy_team",[]));
+  const [teamName,setTeamName]=useState(()=>lss("sfy_teamname",""));
+  const [messages,setMessages]=useState(()=>ls("sfy_chat",[]));
+  const [sv,setSv]=useState("roster"); // roster|addPlayer|playerDetail|chat
+  const [selPlayer,setSelPlayer]=useState(null);
+  const [showAdd,setShowAdd]=useState(false);
+  const [newName,setNewName]=useState("");
+  const [newNum,setNewNum]=useState("");
+  const [addingGame,setAddingGame]=useState(false);
+  const [myName]=useState(()=>lss("sfy_player","Me"));
+  const [chatInput,setChatInput]=useState("");
+  const chatEndRef=useRef(null);
+
+  useEffect(()=>lsSet("sfy_team",players),[players]);
+  useEffect(()=>lsSet("sfy_chat",messages),[messages]);
+  useEffect(()=>{if(sv==="chat")chatEndRef.current?.scrollIntoView({behavior:"smooth"});},[messages,sv]);
+
+  function sendMsg(){
+    if(!chatInput.trim())return;
+    const msg={id:Date.now().toString(),from:myName||"Me",text:chatInput.trim(),ts:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})};
+    setMessages(prev=>[...prev,msg]);
+    setChatInput("");
+  }
+
+  if(!platinum){
+    return(
+      <div className="screen">
+        <div className="topbar"><div className="topbar-title">Team Tracker</div><div className="topbar-sub">Platinum Feature</div></div>
+        <div className="pp">
+          <div style={{textAlign:"center",padding:"32px 0 20px"}}>
+            <div style={{fontSize:52,marginBottom:12}}>🏆</div>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:30,fontWeight:900,color:"#c99800",marginBottom:8}}>Team Tracker & Chat</div>
+            <div style={{fontSize:14,color:"#666",lineHeight:1.7,marginBottom:24}}>Track your entire team's stats, manage your roster, and message teammates — all in one place. Included with Platinum.</div>
+            <button className="btn btn-gold" onClick={onUpgrade}>Unlock with Platinum · $5.99/mo</button>
+          </div>
+          <div style={{position:"relative",marginTop:20,pointerEvents:"none",filter:"blur(3px)",opacity:.3}}>
+            {["Jake M.","Tyler C.","Marcus W."].map((n,i)=>(
+              <div key={n} className="player-row mb8">
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <Avatar name={n} size={36} colorIdx={i}/>
+                  <div><div style={{fontWeight:700}}>{n}</div><div style={{fontSize:12,color:"#555"}}>#{[12,7,24][i]}</div></div>
+                </div>
+                <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:800,color:"#f97316"}}>.{[312,287,334][i]}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── CHAT VIEW ──
+  if(sv==="chat"){
+    const myDisplayName=myName||"Me";
+    return(
+      <div className="screen" style={{position:"relative",display:"flex",flexDirection:"column"}}>
+        {chatBanner&&<><div className="banner-bg" style={{backgroundImage:`url(${chatBanner})`}}/><div className="banner-overlay"/></>}
+        <div style={{position:"relative",zIndex:2,display:"flex",flexDirection:"column",height:"calc(100vh - 80px)"}}>
+          <div className="topbar" style={{background:"rgba(13,13,13,.9)"}}>
+            <div className="fb">
+              <button className="back-btn" style={{marginBottom:0}} onClick={()=>setSv("roster")}>← Roster</button>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:14,fontWeight:700}}>{teamName||"Team Chat"}</div>
+                <div style={{fontSize:11,color:"#555"}}>{players.length} players</div>
+              </div>
+            </div>
+          </div>
+          <div className="chat-messages" style={{flex:1}}>
+            {messages.length===0&&<div style={{textAlign:"center",color:"#333",fontSize:13,padding:"20px 0"}}>No messages yet — say something! 👋</div>}
+            {messages.map((m,i)=>{
+              const mine=m.from===myDisplayName;
+              return(
+                <div key={m.id}>
+                  {(!messages[i-1]||messages[i-1].from!==m.from)&&<div style={{fontSize:11,color:"#555",fontWeight:600,marginBottom:3,textAlign:mine?"right":"left"}}>{mine?"You":m.from} · {m.ts}</div>}
+                  <div style={{display:"flex",justifyContent:mine?"flex-end":"flex-start",gap:8,alignItems:"flex-end"}}>
+                    {!mine&&<Avatar name={m.from} size={26} colorIdx={players.findIndex(p=>p.name===m.from)%8}/>}
+                    <div className={`msg-bubble ${mine?"msg-mine":"msg-other"}`}>{m.text}</div>
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={chatEndRef}/>
+          </div>
+          <div className="chat-input-bar">
+            <input className="field" style={{flex:1,padding:"10px 14px"}} placeholder={`Message as ${myDisplayName}…`} value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}}}/>
+            <button className="btn btn-primary" style={{width:"auto",padding:"10px 18px"}} onClick={sendMsg} disabled={!chatInput.trim()}>Send</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── PLAYER DETAIL ──
+  if(sv==="playerDetail"&&selPlayer){
+    const p=players.find(x=>x.id===selPlayer.id)||selPlayer;
+    const pg=p.games||[],bt=sumField(pg,"batting"),bs=calcB(bt);
+    const sorted=[...pg].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    if(addingGame){
+      function savePlayerGame(form){
+        const entry={id:Date.now().toString(),...form};
+        setPlayers(prev=>prev.map(pl=>pl.id===p.id?{...pl,games:[...(pl.games||[]),entry]}:pl));
+        setAddingGame(false);
+      }
+      return <div className="screen"><GameForm onSave={savePlayerGame} onBack={()=>setAddingGame(false)}/></div>;
+    }
+    return(
+      <div className="screen">
+        <div className="topbar"><button className="back-btn" onClick={()=>{setSv("roster");setSelPlayer(null);}}>← Roster</button></div>
+        <div className="pp">
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:20}}>
+            <Avatar name={p.name} size={52} colorIdx={p.ci||0}/>
+            <div><div style={{fontSize:20,fontWeight:800}}>{p.name}</div><div style={{fontSize:13,color:"#666"}}>#{p.number} · {pg.length} Games</div></div>
+          </div>
+          <div className="g4 mb8">{[["AVG",fmtA(bs.avg)],["OBP",fmtA(bs.obp)],["SLG",fmtA(bs.slg)],["OPS",fmt(bs.ops,3)]].map(([k,v])=><StatBox key={k} label={k} value={v}/>)}</div>
+          <div className="g5 mb20">{[["AB",bt.AB||0],["H",bt.H||0],["HR",bt.HR||0],["RBI",bt.RBI||0],["BB",bt.BB||0]].map(([k,v])=><StatBox key={k} label={k} value={v}/>)}</div>
+          <div className="fb mb12"><div className="section-label" style={{marginBottom:0}}>Game Log</div><button className="btn btn-primary" style={{width:"auto",padding:"7px 14px",fontSize:13}} onClick={()=>setAddingGame(true)}>+ Game</button></div>
+          {sorted.length===0&&<div className="empty"><div style={{fontSize:36,marginBottom:8}}>📋</div><div style={{fontSize:14}}>No games logged yet.</div></div>}
+          {sorted.map(g=><div key={g.id} className="game-row mb8"><div><div style={{fontWeight:700,fontSize:15}}>vs. {g.opponent}</div><div style={{fontSize:12,color:"#555",marginTop:2}}>{g.date}{g.result?` · ${g.result}`:""}</div></div><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:800,color:"#f97316"}}>{g.batting.H||0}-{g.batting.AB||0}</div></div>)}
+        </div>
+      </div>
+    );
+  }
+
+  // ── ROSTER VIEW ──
+  return(
+    <div className="screen">
+      <div className="topbar">
+        <div className="fb">
+          <div><div className="topbar-title">Team Tracker</div><div className="topbar-sub">{players.length} Players</div></div>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <div className="plat-badge-pill">PLATINUM</div>
+            <button className="btn btn-ghost" style={{fontSize:12,padding:"6px 12px"}} onClick={()=>setSv("chat")}>💬 Chat</button>
+          </div>
+        </div>
+      </div>
+      <div className="pp">
+        <div className="card mb16" style={{padding:"12px 16px"}}>
+          <div className="field-label mb8">Team Name</div>
+          <input className="field" style={{background:"transparent",border:"none",fontSize:18,fontWeight:800,padding:0,color:teamName?"#fff":"#444"}} placeholder="Enter team name" value={teamName} onChange={e=>{setTeamName(e.target.value);lsSet("sfy_teamname",e.target.value);}}/>
+        </div>
+        <div className="fb mb12"><div className="section-label" style={{marginBottom:0}}>Roster</div><button className="btn btn-primary" style={{width:"auto",padding:"7px 14px",fontSize:13}} onClick={()=>setShowAdd(true)}>+ Player</button></div>
+        {showAdd&&<div className="card mb12">
+          <div className="field-label mb8">Add Player</div>
+          <div className="g2 mb8">
+            <div><div className="field-label">Name</div><input className="field" placeholder="Full name" value={newName} onChange={e=>setNewName(e.target.value)}/></div>
+            <div><div className="field-label">Jersey #</div><input className="field" placeholder="00" value={newNum} onChange={e=>setNewNum(e.target.value)}/></div>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button className="btn btn-primary" style={{flex:1}} disabled={!newName} onClick={()=>{setPlayers(prev=>[...prev,{id:Date.now().toString(),name:newName,number:newNum,games:[],ci:prev.length%8}]);setNewName("");setNewNum("");setShowAdd(false);}}>Add</button>
+            <button className="btn btn-ghost" onClick={()=>{setShowAdd(false);setNewName("");setNewNum("");}}>Cancel</button>
+          </div>
+        </div>}
+        {players.length===0&&<div className="empty"><div style={{fontSize:40,marginBottom:10}}>👥</div><div style={{fontSize:14,lineHeight:1.6}}>No players yet.<br/>Add your roster to get started.</div></div>}
+        {players.map(p=>{const pb=sumField(p.games||[],"batting"),bs=calcB(pb);return(
+          <div key={p.id} className="player-row mb8" style={{cursor:"pointer"}} onClick={()=>{setSelPlayer(p);setSv("playerDetail");}}>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <Avatar name={p.name} size={40} colorIdx={p.ci||0}/>
+              <div><div style={{fontWeight:700,fontSize:15}}>{p.name}</div><div style={{fontSize:12,color:"#555"}}>#{p.number} · {(p.games||[]).length} games</div></div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:14}}>
+              <div style={{textAlign:"right"}}><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:20,fontWeight:800,color:"#f97316"}}>{fmtA(bs.avg)}</div><div style={{fontSize:10,color:"#555"}}>AVG</div></div>
+              <div style={{color:"#333"}}>›</div>
+            </div>
+          </div>
+        );})}
+        {players.length>1&&<div className="mt20">
+          <div className="section-label">Leaderboard</div>
+          {["AVG","HR","RBI"].map(stat=>{
+            const ranked=[...players].map(p=>{const pb=sumField(p.games||[],"batting"),bs=calcB(pb);return{...p,val:stat==="AVG"?bs.avg:(pb[stat]||0)};}).sort((a,b)=>b.val-a.val).slice(0,3);
+            return(
+              <div key={stat} className="card mb8">
+                <div style={{fontSize:12,fontWeight:700,color:"#f97316",marginBottom:8}}>{stat} Leaders</div>
+                {ranked.map((p,i)=>(
+                  <div key={p.id} style={{display:"flex",alignItems:"center",gap:10,padding:"5px 0",borderBottom:i<ranked.length-1?"1px solid #1a1a1a":"none"}}>
+                    <div style={{fontSize:12,fontWeight:800,color:["#f97316","#888","#6b5500"][i],width:16}}>{i+1}</div>
+                    <Avatar name={p.name} size={28} colorIdx={p.ci||0}/>
+                    <div style={{flex:1,fontSize:13,fontWeight:600}}>{p.name}</div>
+                    <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:19,fontWeight:800,color:"#f97316"}}>{stat==="AVG"?fmtA(p.val):p.val}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>}
+      </div>
+    </div>
+  );
+}
+
+// ── PLATINUM SCREEN ───────────────────────────────────────────────────────────
+
+function PlatinumScreen({platinum,onPurchase}){
+  const [busy,setBusy]=useState(false);
+  const [done,setDone]=useState(false);
+
+  function doPurchase(){
+    setBusy(true);
+    setTimeout(()=>{setBusy(false);setDone(true);setTimeout(onPurchase,1800);},2200);
+  }
+
+  if(done) return(
+    <div className="screen" style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{textAlign:"center",padding:40}}>
+        <div style={{fontSize:64,marginBottom:14}}>🏆</div>
+        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:34,fontWeight:900,color:"#c99800",marginBottom:8}}>Welcome to Platinum!</div>
+        <div style={{fontSize:14,color:"#777"}}>All features are now unlocked.</div>
+      </div>
+    </div>
+  );
+
+  if(platinum) return(
+    <div className="screen">
+      <div className="topbar"><div className="topbar-title">Membership</div></div>
+      <div className="pp">
+        <div className="plat-hero mb20">
+          <div style={{fontSize:48,marginBottom:8}}>🏆</div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:800,letterSpacing:".15em",color:"#c99800",marginBottom:6}}>PLATINUM MEMBER</div>
+          <div style={{fontSize:13,color:"#9a7800"}}>All features unlocked. Keep grinding. 🔥</div>
+        </div>
+        <div className="card">
+          {[["⚾","My Stats","Full game log + season analytics"],["📚","Learn the Stats","Deep breakdowns, formulas & benchmarks"],["👥","Team Tracker","Full roster with per-player game logs"],["💬","Team Chat","Message your teammates in real time"],["🖼️","Custom Backgrounds","Team banner on Stats & Chat screens"],["📸","Photo Profile","Upload your selfie or action shot"]].map(([icon,title,desc])=>(
+            <div key={title} className="plat-feat"><div style={{fontSize:22,flexShrink:0,marginTop:1}}>{icon}</div><div><div style={{fontSize:14,fontWeight:700,marginBottom:2}}>{title}</div><div style={{fontSize:12,color:"#666",lineHeight:1.5}}>{desc}</div></div></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return(
+    <div className="screen">
+      <div className="topbar"><div className="topbar-title">Go Platinum</div><div className="topbar-sub">Unlock everything</div></div>
+      <div className="pp">
+        <div className="plat-hero mb20">
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,letterSpacing:".15em",color:"#c99800",marginBottom:6}}>StatsForYou Platinum</div>
+          <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:4,margin:"8px 0 4px"}}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:56,fontWeight:900,color:"#c99800",lineHeight:1}}>$5.99</div>
+            <div style={{fontSize:16,color:"#9a7800",paddingBottom:10}}>/mo</div>
+          </div>
+          <div style={{fontSize:12,color:"#6b4d00"}}>7-day free trial · Cancel anytime</div>
+        </div>
+
+        <div className="section-label">What's included</div>
+        <div className="card mb20">
+          {[["👥","Team Tracker","Add your full roster and track each player's stats individually."],["💬","Team Chat","Built-in messaging so your team stays connected between games."],["🖼️","Team Banner","Upload your team photo or banner as the background on Stats & Chat."],["📸","Profile Photo","Upload your own selfie or action shot to personalize your profile."],["📊","Advanced Stats","OPS, WHIP, SLG — the numbers scouts actually look at."]].map(([icon,title,desc])=>(
+            <div key={title} className="plat-feat"><div style={{fontSize:22,flexShrink:0}}>{icon}</div><div><div style={{fontSize:14,fontWeight:700,marginBottom:2}}>{title}</div><div style={{fontSize:12,color:"#666",lineHeight:1.5}}>{desc}</div></div></div>
+          ))}
+        </div>
+
+        <div className="card mb16">
+          <div style={{fontSize:11,color:"#555",fontWeight:700,letterSpacing:".07em",textTransform:"uppercase",marginBottom:8,textAlign:"center"}}>Free vs Platinum</div>
+          {[["Game log","✓","✓"],["Learn the Stats","✓","✓"],["Advanced stat depth","—","✓"],["Photo profile","—","✓"],["Team banner background","—","✓"],["Team Tracker","—","✓"],["Team Chat","—","✓"]].map(([feat,f,p])=>(
+            <div key={feat} style={{display:"flex",alignItems:"center",padding:"7px 0",borderBottom:"1px solid #1a1a1a"}}>
+              <div style={{flex:1,fontSize:13,color:"#888"}}>{feat}</div>
+              <div style={{width:52,textAlign:"center",fontSize:13,color:f==="✓"?"#4ade80":"#444"}}>{f}</div>
+              <div style={{width:52,textAlign:"center",fontSize:13,fontWeight:700,color:p==="✓"?"#c99800":"#444"}}>{p}</div>
+            </div>
+          ))}
+          <div style={{display:"flex",paddingTop:6}}>
+            <div style={{flex:1}}/>
+            <div style={{width:52,textAlign:"center",fontSize:10,color:"#555",fontWeight:700}}>FREE</div>
+            <div style={{width:52,textAlign:"center",fontSize:10,color:"#c99800",fontWeight:700}}>PLAT</div>
+          </div>
+        </div>
+
+        <button className="btn btn-gold mb8" disabled={busy} onClick={doPurchase}>{busy?"Processing...":"Start Free Trial · $5.99/mo"}</button>
+        <div style={{textAlign:"center",fontSize:12,color:"#555"}}>7 days free. Cancel anytime. No commitment.</div>
+      </div>
+    </div>
+  );
+}
+
+// ── PROFILE SCREEN ────────────────────────────────────────────────────────────
+
+function ProfileScreen({platinum,onUpgrade,profilePhoto,setProfilePhoto,statsBanner,setStatsBanner,chatBanner,setChatBanner}){
+  const [player,setPlayer]=useState(()=>lss("sfy_player",""));
+  const [editing,setEditing]=useState(false);
+  const [draft,setDraft]=useState(player);
+  const [position,setPosition]=useState(()=>lss("sfy_position",""));
+  const [jersey,setJersey]=useState(()=>lss("sfy_jersey",""));
+  const [grad,setGrad]=useState(()=>lss("sfy_grad",""));
+  const [bio,setBio]=useState(()=>lss("sfy_bio",""));
+
+  const games=ls("sfy_games",[]);
+
+  function save(){lsSet("sfy_player",player);lsSet("sfy_position",position);lsSet("sfy_jersey",jersey);lsSet("sfy_grad",grad);lsSet("sfy_bio",bio);}
+
+  return(
+    <div className="screen">
+      <div className="topbar"><div className="topbar-title">Profile</div><div className="topbar-sub">Customize your page</div></div>
+      <div className="pp">
+
+        {/* ── PHOTO + NAME ── */}
+        <div style={{textAlign:"center",marginBottom:24}}>
+          <PhotoPicker label={profilePhoto?"Change Photo":"Add Profile Photo"} current={profilePhoto} onPick={v=>{setProfilePhoto(v);lsSet("sfy_photo",v);}} size={88} hint="Upload your selfie or action shot"/>
+          <div style={{marginTop:14}}>
+            {editing?(
+              <div>
+                <input className="field" style={{textAlign:"center",fontSize:18,fontWeight:700,maxWidth:220,margin:"0 auto 10px",display:"block"}} value={draft} onChange={e=>setDraft(e.target.value)} autoFocus/>
+                <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+                  <button className="btn btn-primary" style={{width:"auto",padding:"7px 18px"}} onClick={()=>{setPlayer(draft);setEditing(false);}}>Save</button>
+                  <button className="btn btn-ghost" onClick={()=>{setDraft(player);setEditing(false);}}>Cancel</button>
+                </div>
+              </div>
+            ):(
+              <div>
+                <div style={{fontSize:22,fontWeight:800,marginBottom:6}}>{player||"Set your name"}</div>
+                <button className="btn btn-ghost" style={{fontSize:12,padding:"5px 14px"}} onClick={()=>{setDraft(player);setEditing(true);}}>✏️ Edit Name</button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── ATHLETE INFO ── */}
+        <div className="card mb16">
+          <div className="section-label">Athlete Info</div>
+          <div className="g2 mb12">
+            <div><div className="field-label">Position</div><input className="field" placeholder="e.g. SS / RHP" value={position} onChange={e=>{setPosition(e.target.value);lsSet("sfy_position",e.target.value);}}/></div>
+            <div><div className="field-label">Jersey #</div><input className="field" placeholder="00" value={jersey} onChange={e=>{setJersey(e.target.value);lsSet("sfy_jersey",e.target.value);}}/></div>
+          </div>
+          <div className="mb12"><div className="field-label">Grad Year</div><input className="field" placeholder="e.g. 2027" value={grad} onChange={e=>{setGrad(e.target.value);lsSet("sfy_grad",e.target.value);}}/></div>
+          <div><div className="field-label">Bio / Goal</div><textarea className="field" rows={3} placeholder="My goal is to play D1 ball..." value={bio} onChange={e=>{setBio(e.target.value);lsSet("sfy_bio",e.target.value);}}/></div>
+        </div>
+
+        {/* ── BACKGROUNDS (PLATINUM) ── */}
+        {platinum?(
+          <div className="card mb16">
+            <div className="section-label">Backgrounds</div>
+            <div className="mb16"><BannerPicker label="Stats Screen Banner" current={statsBanner} onPick={v=>{setStatsBanner(v);lsSet("sfy_statsbanner",v);}}/></div>
+            <BannerPicker label="Team Chat Banner" current={chatBanner} onPick={v=>{setChatBanner(v);lsSet("sfy_chatbanner",v);}}/>
+            <div style={{fontSize:11,color:"#555",marginTop:10}}>Upload a team photo, field shot, or any image — it'll show as a subtle background on those screens.</div>
+          </div>
+        ):(
+          <div className="card mb16" style={{border:"1px solid #c9980030",background:"#1a1200"}}>
+            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              <div style={{fontSize:24}}>🖼️</div>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:"#c99800",marginBottom:4}}>Custom Backgrounds</div>
+                <div style={{fontSize:13,color:"#666",lineHeight:1.6,marginBottom:10}}>Upload your team banner or photo as a background on your Stats and Chat screens — Platinum only.</div>
+                <button className="btn btn-gold" style={{width:"auto",padding:"8px 16px",fontSize:13}} onClick={onUpgrade}>Upgrade to Platinum · $5.99/mo</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── SEASON SUMMARY ── */}
+        <div className="card mb16">
+          <div className="section-label">Season Summary</div>
+          <div className="g3">{[["Games",games.length],["AB",sumField(games,"batting").AB||0],["HR",sumField(games,"batting").HR||0]].map(([k,v])=>(
+            <div key={k} style={{textAlign:"center"}}><div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:30,fontWeight:900,color:"#f97316"}}>{v}</div><div style={{fontSize:11,color:"#555",fontWeight:700,letterSpacing:".06em"}}>{k}</div></div>
+          ))}</div>
+        </div>
+
+        {/* ── MEMBERSHIP ── */}
+        <div className="card mb16">
+          <div className="section-label">Membership</div>
+          <div className="prof-row">
+            <div><div style={{fontSize:15,fontWeight:700}}>{platinum?"Platinum 🏆":"Free"}</div><div style={{fontSize:12,color:"#666"}}>{platinum?"All features unlocked":"Limited access"}</div></div>
+            {!platinum&&<button className="btn btn-gold" style={{width:"auto",padding:"8px 14px",fontSize:13}} onClick={onUpgrade}>Upgrade</button>}
+          </div>
+        </div>
+
+        {/* ── ABOUT ── */}
+        <div className="card mb16">
+          <div className="section-label">About</div>
+          <div className="prof-row"><span style={{fontSize:14,color:"#888"}}>App</span><span style={{fontSize:14,fontWeight:600}}>StatsForYou</span></div>
+          <div className="prof-row"><span style={{fontSize:14,color:"#888"}}>Version</span><span style={{fontSize:14,fontWeight:600}}>3.0</span></div>
+          <div className="prof-row" style={{borderBottom:"none"}}><span style={{fontSize:14,color:"#888"}}>Data</span><span style={{fontSize:14,fontWeight:600}}>Saved on this device</span></div>
+        </div>
+
+        <button className="btn" style={{width:"100%",padding:"12px",background:"#1a0a0a",color:"#f87171",border:"1px solid #3a1a1a",fontSize:13}} onClick={()=>{if(confirm("Clear all game data? This cannot be undone.")){["sfy_games","sfy_team","sfy_chat"].forEach(k=>localStorage.removeItem(k));window.location.reload();}}}>Clear All Data</button>
+      </div>
+    </div>
+  );
+}
+
+// ── APP ROOT ──────────────────────────────────────────────────────────────────
+
+function App(){
+  const [tab,setTab]=useState("stats");
+  const [platinum,setPlatinum]=useState(()=>lss("sfy_platinum","")===("1"));
+  const [profilePhoto,setProfilePhoto]=useState(()=>lss("sfy_photo",""));
+  const [statsBanner,setStatsBanner]=useState(()=>lss("sfy_statsbanner",""));
+  const [chatBanner,setChatBanner]=useState(()=>lss("sfy_chatbanner",""));
+
+  function unlockPlatinum(){lsSet("sfy_platinum","1");setPlatinum(true);setTab("team");}
+
+  const NAV=[
+    {id:"stats",icon:"⚾",label:"My Stats"},
+    {id:"learn",icon:"📚",label:"Learn"},
+    {id:"team",icon:"👥",label:"Team"},
+    {id:"platinum",icon:"🏆",label:"Platinum"},
+    {id:"profile",icon:"👤",label:"Profile"},
+  ];
+
+  return(
+    <div className="app">
+      <div style={{display:tab==="stats"?"block":"none"}}><MyStatsScreen platinum={platinum} profilePhoto={profilePhoto} statsBanner={statsBanner}/></div>
+      <div style={{display:tab==="learn"?"block":"none"}}><LearnScreen/></div>
+      <div style={{display:tab==="team"?"block":"none"}}><TeamScreen platinum={platinum} onUpgrade={()=>setTab("platinum")} profilePhoto={profilePhoto} chatBanner={chatBanner}/></div>
+      <div style={{display:tab==="platinum"?"block":"none"}}><PlatinumScreen platinum={platinum} onPurchase={unlockPlatinum}/></div>
+      <div style={{display:tab==="profile"?"block":"none"}}><ProfileScreen platinum={platinum} onUpgrade={()=>setTab("platinum")} profilePhoto={profilePhoto} setProfilePhoto={setProfilePhoto} statsBanner={statsBanner} setStatsBanner={setStatsBanner} chatBanner={chatBanner} setChatBanner={setChatBanner}/></div>
+
+      <nav className="bottomnav">
+        {NAV.map(n=>(
+          <button key={n.id} className={`nav-item${tab===n.id?" active":""}`} onClick={()=>setTab(n.id)}>
+            <span className="nav-icon">{n.icon}</span>
+            {n.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
